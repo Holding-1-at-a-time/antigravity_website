@@ -1,3 +1,5 @@
+'use client';
+
 import type { Metadata } from 'next';
 import { ChevronDown, HelpCircle, Search } from 'lucide-react';
 import { useState } from 'react';
