@@ -1,0 +1,33 @@
+{
+  "name": "first_antigracity_workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.26",
+    "googleapis": "^169.0.0",
+    "lucide-react": "^0.562.0",
+    "next": "16.0.9",
+    "react": "19.2.2",
+    "react-dom": "19.2.2",
+    "resend": "^6.6.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.9",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.26.1"
+}

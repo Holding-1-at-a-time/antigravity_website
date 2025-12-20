@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #00ae98;
+  --color-primary-dark: #008f7d;
+  --color-primary-light: #33bead;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', system-ui, sans-serif;
+}
+
+:root {
+  /* Colors */
+  --primary: #00ae98;
+  --primary-dark: #008f7d;
+  --primary-light: #33bead;
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #e0e0e0;
+  --muted: #404040;
+  --muted-foreground: #a3a3a3;
+  --border: #333333;
+
+  /* Spacing & Layout */
+  --max-width: 1280px;
+  --header-height: 80px;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  margin-top: 0;
+}
+
+/* Utilities */
+/* Add any custom utilities here that Tailwind doesn't cover, or use @layer utilities */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
