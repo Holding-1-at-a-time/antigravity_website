@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FadeIn } from '@/components/ui/FadeIn';
 import ContactForm from './ContactForm';
+import { contactPageSchema } from '@/lib/schemas';
 
 export const metadata: Metadata = {
     title: 'Contact Us | One Detail At A Time',
@@ -14,6 +15,10 @@ export const metadata: Metadata = {
 export default function ContactPage() {
     return (
         <div className="flex flex-col min-h-screen">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
+            />
             <Header />
 
             <main className="flex-grow pt-32 pb-20 bg-[#0a0a0a]">

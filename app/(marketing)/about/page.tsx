@@ -7,10 +7,15 @@ import Footer from '@/components/Footer';
 import { FadeIn } from '@/components/ui/FadeIn';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { motion } from 'framer-motion';
+import { aboutPageSchema } from '@/lib/schemas';
 
 export default function AboutPage() {
     return (
         <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutPageSchema) }}
+            />
             <Header />
 
             <main className="flex-grow pt-24 pb-20">

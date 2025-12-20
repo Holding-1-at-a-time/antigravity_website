@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FadeIn } from '@/components/ui/FadeIn';
+import { generateServiceSchema, generateBreadcrumbSchema } from '@/lib/schemas';
 
 // Generate segments for all 15 services (SSG)
 export async function generateStaticParams() {
@@ -41,41 +42,12 @@ export default async function ServicePillarPage({ params }: { params: Promise<{ 
         notFound();
     }
 
-    // Schema.org Breadcrumb
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Services",
-                "item": "https://odaat1.com/services"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": service.title,
-                "item": `https://odaat1.com/services/${service.slug}`
-            }
-        ]
-    };
-
-    // Schema.org Service
-    const serviceSchema = {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": service.title,
-        "provider": {
-            "@type": "LocalBusiness",
-            "name": "One Detail At A Time LLC"
-        },
-        "areaServed": {
-            "@type": "City",
-            "name": "San Antonio"
-        },
-        "description": service.fullDescription
-    };
+    // Generate schemas
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: "Services", url: "https://odaat1.com/services" },
+        { name: service.title, url: `https://odaat1.com/services/${service.slug}` }
+    ]);
+    const serviceSchema = generateServiceSchema(service.slug);
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0a0a0a]">

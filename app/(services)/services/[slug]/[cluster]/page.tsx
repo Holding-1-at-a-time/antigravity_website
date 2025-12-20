@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FadeIn } from '@/components/ui/FadeIn';
+import { generateBreadcrumbSchema, generateServiceClusterSchema } from '@/lib/schemas';
 
 // Generate segments for all clusters
 export async function generateStaticParams() {
@@ -50,31 +51,13 @@ export default async function ServiceClusterPage({ params }: { params: Promise<{
         notFound();
     }
 
-    // Schema
-    const breadcrumbSchema = {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Services",
-                "item": "https://odaat1.com/services"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": service.title,
-                "item": `https://odaat1.com/services/${service.slug}`
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": cluster.title,
-                "item": `https://odaat1.com/services/${service.slug}/${cluster.slug}`
-            }
-        ]
-    };
+    // Generate schemas
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: "Services", url: "https://odaat1.com/services" },
+        { name: service.title, url: `https://odaat1.com/services/${service.slug}` },
+        { name: cluster.title, url: `https://odaat1.com/services/${service.slug}/${cluster.slug}` }
+    ]);
+    const clusterSchema = generateServiceClusterSchema(service.slug, cluster.slug);
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
@@ -82,6 +65,7 @@ export default async function ServiceClusterPage({ params }: { params: Promise<{
 
             <main className="flex-grow pt-32 pb-20">
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+                {clusterSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(clusterSchema) }} />}
 
                 <div className="container px-4">
                     {/* Breadcrumbs */}
