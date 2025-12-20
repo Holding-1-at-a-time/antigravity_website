@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Calendar, Phone, MapPin, Star, Search, ChevronDown, Facebook, Instagram, Twitter } from 'lucide-react';
+import { Menu, X, Calendar, Phone, MapPin, Star, Search, ChevronDown, Facebook, Instagram, Twitter, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ALL_SERVICES } from '@/lib/services-data';
@@ -82,6 +82,7 @@ export default function Header() {
         { href: '/services', label: 'Services', icon: Calendar },
         { href: '/about', label: 'About', icon: MapPin },
         { href: '/reviews', label: 'Reviews', icon: Star },
+        { href: '/faq', label: 'FAQ', icon: HelpCircle },
         { href: '/contact', label: 'Contact', icon: Phone },
     ];
 

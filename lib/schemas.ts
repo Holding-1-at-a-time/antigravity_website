@@ -1,4 +1,5 @@
 import { ALL_SERVICES } from './services-data';
+import { FAQ_DATA } from './faq-data';
 
 // Base business information
 const BUSINESS_INFO = {
@@ -211,4 +212,24 @@ export const generateServiceClusterSchema = (serviceSlug: string, clusterSlug: s
       "name": BUSINESS_INFO.name
     }
   };
+};
+
+// FAQ Page Schema
+export const faqPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "name": "Frequently Asked Questions - One Detail At A Time",
+  "description": "Comprehensive FAQ covering auto detailing services, business information, pricing, and processes in San Antonio.",
+  "mainEntity": FAQ_DATA.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  })),
+  "publisher": {
+    "@type": "Organization",
+    "name": BUSINESS_INFO.name
+  }
 };

@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { FadeIn } from '@/components/ui/FadeIn';
 import { FAQ_DATA, FAQ_CATEGORIES } from '@/lib/faq-data';
+import { faqPageSchema } from '@/lib/schemas';
 
 export const metadata: Metadata = {
   title: 'FAQ | One Detail At A Time San Antonio',
@@ -36,6 +37,10 @@ export default function FAQPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageSchema) }}
+      />
       <Header />
 
       <main className="flex-grow pt-32 pb-20">
