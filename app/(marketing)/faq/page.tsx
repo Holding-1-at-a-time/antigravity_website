@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
 import { ChevronDown, HelpCircle, Search } from 'lucide-react';
 import { useState } from 'react';
 import Header from '@/components/Header';
@@ -9,11 +8,6 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { FadeIn } from '@/components/ui/FadeIn';
 import { FAQ_DATA, FAQ_CATEGORIES } from '@/lib/faq-data';
 import { faqPageSchema } from '@/lib/schemas';
-
-export const metadata: Metadata = {
-  title: 'FAQ | One Detail At A Time San Antonio',
-  description: 'Frequently asked questions about our auto detailing services in San Antonio. Learn about ceramic coating, paint correction, pricing, and our mobile valet service.',
-};
 
 export default function FAQPage() {
   const [searchTerm, setSearchTerm] = useState('');
