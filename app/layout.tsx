@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import ConvexClientProvider from './ConvexClientProvider';
 import { websiteSchema, organizationSchema, localBusinessSchema } from '@/lib/schemas';
 import { Analytics } from "@vercel/analytics/next"
 
@@ -96,7 +97,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
+        <ConvexClientProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </ConvexClientProvider>
         <Analytics />
       </body>
     </html>
