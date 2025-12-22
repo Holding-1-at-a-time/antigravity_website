@@ -25,8 +25,8 @@ const BUSINESS_INFO = {
   priceRange: "$$",
   areaServed: [
     { "@type": "City", name: "San Antonio" },
-    { "@type": "Neighborhood", name: "Stone Oak" },
-    { "@type": "Neighborhood", name: "Alamo Heights" }
+    { "@type": "Place", name: "Stone Oak" },
+    { "@type": "Place", name: "Alamo Heights" }
   ]
 };
 
@@ -131,6 +131,94 @@ export const aboutPageSchema = {
         "name": "Ceramic Pro Certified Installer"
       }
     ]
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5.0",
+    "reviewCount": "28",
+    "bestRating": "5",
+    "worstRating": "1",
+    "url": "https://maps.app.goo.gl/3rRGzaQPwc3X7RweA"
+  },
+  "accountablePerson": {
+    "@type": "Person",
+    "name": "Robert Romero Jr",
+    "jobTitle": "CEO/Owner/Founder/Professional Detailer",
+    "affiliation": {
+      "@type": "Organization",
+      "name": BUSINESS_INFO.name,
+      "url": BUSINESS_INFO.url
+    },
+    "hasOccupation": [
+      {
+        "@type": "Occupation",
+        "name": "Chief Executive Officer"
+      },
+      {
+        "@type": "Occupation",
+        "name": "Business Owner"
+      },
+      {
+        "@type": "Occupation",
+        "name": "Founder"
+      },
+      {
+        "@type": "Occupation",
+        "name": "Professional Auto Detailer"
+      }
+    ],
+    "worksFor": {
+      "@type": "Organization",
+      "name": BUSINESS_INFO.name,
+      "url": BUSINESS_INFO.url,
+      "address": {
+        "@type": "PostalAddress",
+        ...BUSINESS_INFO.address
+      }
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": BUSINESS_INFO.telephone,
+      "email": BUSINESS_INFO.email,
+      "contactType": "business"
+    }
+  },
+  "accessModeSufficient": ["textual", "visual"],
+  "sourceOrganization": {
+    "@type": "Organization",
+    "name": BUSINESS_INFO.name,
+    "url": BUSINESS_INFO.url
+  },
+  "mainEntityOfPage": {
+    "@type": "ItemList",
+    "name": "Business Values",
+    "description": "Core values that guide One Detail At A Time's commitment to excellence",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Excellence",
+        "description": "Uncompromising commitment to quality in every service"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Integrity",
+        "description": "Transparent pricing, honest recommendations, and fully insured services"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Community",
+        "description": "Proud supporters of Junior Achievement of South Texas"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "Service",
+        "description": "Customer-first approach with convenient valet options"
+      }
+    ]
   }
 };
 
@@ -184,7 +272,7 @@ export const generateServiceSchema = (serviceSlug: string) => {
     "areaServed": BUSINESS_INFO.areaServed,
     "offers": {
       "@type": "Offer",
-      "priceRange": BUSINESS_INFO.priceRange
+      "availability": "https://schema.org/InStock"
     }
   };
 };
