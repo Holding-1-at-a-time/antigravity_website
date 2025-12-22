@@ -39,6 +39,22 @@ export const getOrganizationBySlug = query({
   },
 });
 
+// Get organization by ID
+export const getOrganizationById = query({
+  args: {
+    id: v.id("organizations"),
+  },
+  handler: async (ctx, args) => {
+    const org = await ctx.db.get(args.id);
+
+    if (!org) {
+      throw new Error("Organization not found");
+    }
+
+    return org;
+  },
+});
+
 // Create a new organization (admin only)
 export const createOrganization = mutation({
   args: {

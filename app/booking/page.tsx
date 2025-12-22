@@ -1,12 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-
-// Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useConvex } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -21,7 +18,10 @@ type BookingStep = 'services' | 'customer' | 'datetime' | 'payment' | 'confirmat
 
 export default function BookingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const convex = useConvex();
   const [currentStep, setCurrentStep] = useState<BookingStep>('services');
+  const [services, setServices] = useState<any[]>([]);
   const [selectedServices, setSelectedServices] = useState<any[]>([]);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
@@ -33,9 +33,46 @@ export default function BookingPage() {
     vehicleColor: '',
   });
   const [selectedDateTime, setSelectedDateTime] = useState<string>('');
-  const [clientSecret, setClientSecret] = useState<string>('');
+  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string>('');
+
+  // Hardcode org id for now
+  const organizationId = 'your-org-id'; // TODO: get from context or params
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const servicesData = await convex.query(api.services.getServices, { organizationId });
+        setServices(servicesData);
+      } catch (error) {
+        console.error('Failed to fetch services:', error);
+      }
+    };
+    fetchServices();
+  }, [convex, organizationId]);
+
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      setCurrentStep('confirmation');
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (selectedDate) {
+      const fetchSlots = async () => {
+        try {
+          const response = await fetch(`/api/calendar?date=${selectedDate}&organizationId=${organizationId}`);
+          const data = await response.json();
+          setAvailableSlots(data.slots || []);
+        } catch (error) {
+          console.error('Failed to fetch slots:', error);
+        }
+      };
+      fetchSlots();
+    }
+  }, [selectedDate, organizationId]);
 
   const steps = [
     { id: 'services', title: 'Select Services', icon: Car },
@@ -70,44 +107,76 @@ export default function BookingPage() {
   };
 
   const handlePayment = async () => {
-    if (!clientSecret) {
-      setPaymentError('Payment not initialized');
-      return;
-    }
-
     setIsProcessing(true);
     setPaymentError('');
 
     try {
-      // Create payment intent when entering payment step
-      const total = selectedServices.reduce((sum, service) => sum + service.price, 0);
+      // Create customer first
+      const customer = await convex.mutation(api.customers.createCustomer, {
+        organizationId,
+        name: customerInfo.name,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+        vehicleInfo: {
+          make: customerInfo.vehicleMake,
+          model: customerInfo.vehicleModel,
+          year: parseInt(customerInfo.vehicleYear),
+          color: customerInfo.vehicleColor,
+        },
+      });
+
+      // Create booking
+      const booking = await convex.mutation(api.bookings.createBooking, {
+        organizationId,
+        customerId: customer,
+        services: selectedServices.map(s => ({
+          serviceId: s._id,
+          packageName: s.selectedPackage,
+          addOns: s.selectedAddOns || [],
+        })),
+        scheduledAt: new Date(selectedDateTime).getTime(),
+      });
+
+      // Calculate deposit
+      const total = selectedServices.reduce((sum, service) => {
+        let price = service.basePrice;
+        if (service.selectedPackage) {
+          const pkg = service.packages.find((p: any) => p.name === service.selectedPackage);
+          if (pkg) price = pkg.price;
+        }
+        if (service.selectedAddOns) {
+          service.selectedAddOns.forEach((addOn: string) => {
+            const add = service.addOns.find((a: any) => a.name === addOn);
+            if (add) price += add.price;
+          });
+        }
+        return sum + price;
+      }, 0);
       const deposit = Math.round(total * 0.25);
 
+      // Create checkout session
       const response = await fetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: deposit,
-          bookingId: 'temp-booking-id', // This would be the actual booking ID
-          customerId: 'temp-customer-id', // This would be the actual customer ID
+          bookingId: booking,
+          customerId: customer,
+          successUrl: `${window.location.origin}/booking?success=true`,
+          cancelUrl: `${window.location.origin}/booking?canceled=true`,
         }),
       });
 
       const data = await response.json();
       if (data.success) {
-        setClientSecret(data.clientSecret);
-        // Here you would confirm the payment with Stripe
-        // For now, just simulate success
-        setTimeout(() => {
-          setCurrentStep('confirmation');
-          setIsProcessing(false);
-        }, 2000);
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
       } else {
-        setPaymentError('Failed to initialize payment');
+        setPaymentError('Failed to create checkout session');
         setIsProcessing(false);
       }
     } catch (error) {
-      setPaymentError('Payment processing failed');
+      setPaymentError('Booking creation failed');
       setIsProcessing(false);
     }
   };
@@ -118,17 +187,12 @@ export default function BookingPage() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white mb-6">Select Your Services</h2>
-            {/* Mock services - in real app, fetch from Convex */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { id: 1, title: 'Full Detail', price: 150, duration: '3 hours' },
-                { id: 2, title: 'Interior Clean', price: 80, duration: '1.5 hours' },
-                { id: 3, title: 'Ceramic Coating', price: 300, duration: '4 hours' },
-              ].map((service) => (
+              {services.map((service) => (
                 <div
-                  key={service.id}
+                  key={service._id}
                   className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedServices.find(s => s.id === service.id)
+                    selectedServices.find(s => s._id === service._id)
                       ? 'border-primary bg-primary/10'
                       : 'border-gray-600 hover:border-primary/50'
                   }`}
@@ -137,9 +201,9 @@ export default function BookingPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-semibold text-white">{service.title}</h3>
-                      <p className="text-sm text-gray-400">{service.duration}</p>
+                      <p className="text-sm text-gray-400">{service.duration} minutes</p>
                     </div>
-                    <span className="text-primary font-bold">${service.price}</span>
+                    <span className="text-primary font-bold">${service.basePrice}</span>
                   </div>
                 </div>
               ))}
@@ -230,17 +294,38 @@ export default function BookingPage() {
             <h2 className="text-2xl font-bold text-white mb-6">Select Date & Time</h2>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="datetime">Preferred Date & Time</Label>
+                <Label htmlFor="date">Select Date</Label>
                 <Input
-                  id="datetime"
-                  type="datetime-local"
-                  value={selectedDateTime}
-                  onChange={(e) => setSelectedDateTime(e.target.value)}
+                  id="date"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
                   className="bg-gray-800 border-gray-600"
+                  min={new Date().toISOString().split('T')[0]}
                 />
               </div>
+              {availableSlots.length > 0 && (
+                <div>
+                  <Label>Available Time Slots</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                    {availableSlots.map((slot: any) => (
+                      <button
+                        key={slot.start}
+                        className={`p-2 border rounded ${
+                          selectedDateTime === new Date(slot.start).toISOString().slice(0, 16)
+                            ? 'border-primary bg-primary/10'
+                            : 'border-gray-600 hover:border-primary/50'
+                        }`}
+                        onClick={() => setSelectedDateTime(new Date(slot.start).toISOString().slice(0, 16))}
+                      >
+                        {new Date(slot.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <p className="text-sm text-gray-400">
-                We'll confirm the exact time slot based on availability.
+                Select a date to see available time slots.
               </p>
             </div>
           </div>
@@ -279,18 +364,12 @@ export default function BookingPage() {
               </p>
             </div>
 
-            {/* Stripe Payment Form */}
-            <div className="bg-gray-800 p-6 rounded-lg">
-              <div id="stripe-payment-element" className="mb-4">
-                {/* Stripe Elements will be mounted here */}
-              </div>
-              <Button className="w-full" onClick={handlePayment}>
-                {isProcessing ? 'Processing...' : `Pay Deposit $${deposit}`}
-              </Button>
-              {paymentError && (
-                <p className="text-red-400 text-sm mt-2">{paymentError}</p>
-              )}
-            </div>
+            <Button className="w-full" onClick={handlePayment} disabled={isProcessing}>
+              {isProcessing ? 'Creating Booking...' : `Proceed to Payment - $${deposit} Deposit`}
+            </Button>
+            {paymentError && (
+              <p className="text-red-400 text-sm mt-2">{paymentError}</p>
+            )}
           </div>
         );
 

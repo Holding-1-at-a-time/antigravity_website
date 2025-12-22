@@ -26,9 +26,10 @@ export default defineSchema({
         depositPercentage: v.number(),
       }),
       paymentSettings: v.object({
-        squareApplicationId: v.string(),
-        squareAccessToken: v.string(),
-        squareLocationId: v.string(),
+        stripePublishableKey: v.string(),
+        stripeWebhookSecret: v.string(),
+        calendlyToken: v.string(),
+        calendlyEventType: v.string(),
       }),
     }),
   })
@@ -123,6 +124,8 @@ export default defineSchema({
       v.literal("refunded")
     ),
     squarePaymentId: v.optional(v.string()),
+    stripePaymentIntentId: v.optional(v.string()),
+    calendlyEventId: v.optional(v.string()),
     notes: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),

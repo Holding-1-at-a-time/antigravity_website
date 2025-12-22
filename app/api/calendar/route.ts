@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../convex/_generated/api';
+
+// Initialize Convex client
+const convex = new ConvexHttpClient(process.env.CONVEX_URL!);
 
 // Calendly webhook handler
 export async function POST(request: NextRequest) {
@@ -47,19 +52,46 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // TODO: Call Convex function to get available slots
-    // const slots = await convex.query(api.bookings.getAvailableSlots, {
-    //   organizationId,
-    //   date,
-    // });
+    // Get organization settings
+    const org = await convex.query(api.organizations.getOrganizationById, { id: organizationId as any });
+    if (!org) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
 
-    // For now, return mock data
-    const mockSlots = [
-      { start: Date.now() + 3600000, end: Date.now() + 7200000, available: true },
-      { start: Date.now() + 7200000, end: Date.now() + 10800000, available: true },
-    ];
+    const { calendlyToken, calendlyEventType } = org.settings.paymentSettings;
 
-    return NextResponse.json({ slots: mockSlots });
+    if (!calendlyToken || !calendlyEventType) {
+      // Fallback to Convex slots
+      const slots = await convex.query(api.bookings.getAvailableSlots, {
+        organizationId: organizationId as any,
+        date,
+      });
+      return NextResponse.json({ slots });
+    }
+
+    // Call Calendly API for available times
+    const response = await fetch(
+      `https://api.calendly.com/event_type_available_times?event_type=${calendlyEventType}&start_time=${date}T00:00:00Z&end_time=${date}T23:59:59Z`,
+      {
+        headers: {
+          Authorization: `Bearer ${calendlyToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Calendly API error');
+    }
+
+    const data = await response.json();
+    const slots = data.collection.map((slot: any) => ({
+      start: new Date(slot.start_time).getTime(),
+      end: new Date(slot.end_time).getTime(),
+      available: true,
+    }));
+
+    return NextResponse.json({ slots });
   } catch (error) {
     console.error('Error fetching available slots:', error);
     return NextResponse.json({ error: 'Failed to fetch slots' }, { status: 500 });

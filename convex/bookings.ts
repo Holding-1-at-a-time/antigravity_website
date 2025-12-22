@@ -181,6 +181,7 @@ export const updatePaymentStatus = mutation({
       v.literal("refunded")
     ),
     squarePaymentId: v.optional(v.string()),
+    stripePaymentIntentId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const booking = await ctx.db.get(args.bookingId);
@@ -195,6 +196,10 @@ export const updatePaymentStatus = mutation({
 
     if (args.squarePaymentId) {
       updates.squarePaymentId = args.squarePaymentId;
+    }
+
+    if (args.stripePaymentIntentId) {
+      updates.stripePaymentIntentId = args.stripePaymentIntentId;
     }
 
     return await ctx.db.patch(args.bookingId, updates);

@@ -1,41 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../convex/_generated/api';
 
 // Initialize Stripe client
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-12-15.clover',
 });
 
-// Create payment intent
+// Initialize Convex client
+const convex = new ConvexHttpClient(process.env.CONVEX_URL!);
+
+// Create checkout session
 export async function POST(request: NextRequest) {
   try {
-    const { amount, bookingId, customerId } = await request.json();
+    const { amount, bookingId, customerId, successUrl, cancelUrl } = await request.json();
 
-    if (!amount || !bookingId) {
+    if (!amount || !bookingId || !successUrl || !cancelUrl) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Create Stripe payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
-      currency: 'usd',
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Auto Detailing Service Booking',
+              description: `Booking ID: ${bookingId}`,
+            },
+            unit_amount: Math.round(amount * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         bookingId,
         customerId,
-      },
-      description: `Booking payment for ${bookingId}`,
-      automatic_payment_methods: {
-        enabled: true,
       },
     });
 
     return NextResponse.json({
       success: true,
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
+      sessionId: session.id,
+      url: session.url,
     });
   } catch (error) {
-    console.error('Payment intent creation error:', error);
+    console.error('Checkout session creation error:', error);
     return NextResponse.json({ error: 'Payment processing failed' }, { status: 500 });
   }
 }
@@ -60,28 +76,27 @@ export async function PUT(request: NextRequest) {
     }
 
     switch (event.type) {
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
-        console.log('Payment succeeded:', paymentIntent.id);
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        console.log('Checkout completed:', session.id);
 
-        // TODO: Update booking payment status
-        // await convex.mutation(api.bookings.updatePaymentStatus, {
-        //   bookingId: paymentIntent.metadata.bookingId,
-        //   paymentStatus: 'paid',
-        //   stripePaymentId: paymentIntent.id,
-        // });
+        // Update booking payment status
+        await convex.mutation(api.bookings.updatePaymentStatus, {
+          bookingId: session.metadata.bookingId as any,
+          paymentStatus: 'paid',
+          stripePaymentIntentId: session.payment_intent as string,
+        });
         break;
 
-      case 'payment_intent.payment_failed':
-        const failedPayment = event.data.object;
-        console.log('Payment failed:', failedPayment.id);
+      case 'checkout.session.expired':
+        const expiredSession = event.data.object;
+        console.log('Checkout expired:', expiredSession.id);
 
-        // TODO: Update booking payment status
-        // await convex.mutation(api.bookings.updatePaymentStatus, {
-        //   bookingId: failedPayment.metadata.bookingId,
-        //   paymentStatus: 'failed',
-        //   stripePaymentId: failedPayment.id,
-        // });
+        // Update booking payment status
+        await convex.mutation(api.bookings.updatePaymentStatus, {
+          bookingId: expiredSession.metadata.bookingId as any,
+          paymentStatus: 'unpaid',
+        });
         break;
 
       default:
