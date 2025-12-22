@@ -133,7 +133,6 @@ export default defineSchema({
     .index("by_organization", ["organizationId"])
     .index("by_customer", ["customerId"])
     .index("by_status", ["organizationId", "status"])
-    .index("by_scheduled_at", ["organizationId", "scheduledAt"])
     .index("by_organization_scheduled", ["organizationId", "scheduledAt"]),
 
   // Reviews table (existing, but adding organization scoping)

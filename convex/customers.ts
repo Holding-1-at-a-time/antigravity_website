@@ -135,11 +135,11 @@ export const updateCustomer = mutation({
     }
 
     // If email is being updated, check for conflicts
-    if (args.updates.email && args.updates.email !== customer.email) {
+    if (args.updates.email !== undefined && args.updates.email !== customer.email) {
       const existing = await ctx.db
         .query("customers")
         .withIndex("by_email", (q) =>
-          q.eq("organizationId", customer.organizationId).eq("email", args.updates.email)
+          q.eq("organizationId", customer.organizationId).eq("email", args.updates.email as string)
         )
         .first();
 

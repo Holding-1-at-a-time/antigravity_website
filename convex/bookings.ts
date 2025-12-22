@@ -23,13 +23,13 @@ export const getBookings = query({
       q = q.filter((q) => q.eq(q.field("status"), args.status));
     }
 
-    q = q.order("desc");
+    const orderedQ = q.order("desc");
 
     if (args.limit) {
-      return await q.take(args.limit);
+      return await orderedQ.take(args.limit);
     }
 
-    return await q.collect();
+    return await orderedQ.collect();
   },
 });
 

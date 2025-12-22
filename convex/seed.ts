@@ -22,7 +22,7 @@ export const migrateServicesData = action({
   },
   handler: async (ctx, args) => {
     // Import the static data
-    const { ALL_SERVICES } = await import("../../lib/services-data");
+    const { ALL_SERVICES } = await import("../lib/services-data");
 
     console.log(`Migrating ${ALL_SERVICES.length} services...`);
 

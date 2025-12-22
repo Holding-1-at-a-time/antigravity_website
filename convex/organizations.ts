@@ -80,9 +80,10 @@ export const createOrganization = mutation({
         depositPercentage: v.number(),
       }),
       paymentSettings: v.object({
-        squareApplicationId: v.string(),
-        squareAccessToken: v.string(),
-        squareLocationId: v.string(),
+        stripePublishableKey: v.string(),
+        stripeWebhookSecret: v.string(),
+        calendlyToken: v.string(),
+        calendlyEventType: v.string(),
       }),
     })),
   },
@@ -126,9 +127,10 @@ export const createOrganization = mutation({
         depositPercentage: 25,
       },
       paymentSettings: {
-        squareApplicationId: "",
-        squareAccessToken: "",
-        squareLocationId: "",
+        stripePublishableKey: "",
+        stripeWebhookSecret: "",
+        calendlyToken: "",
+        calendlyEventType: "",
       },
     };
 
@@ -164,9 +166,10 @@ export const updateOrganizationSettings = mutation({
         depositPercentage: v.number(),
       })),
       paymentSettings: v.optional(v.object({
-        squareApplicationId: v.string(),
-        squareAccessToken: v.string(),
-        squareLocationId: v.string(),
+        stripePublishableKey: v.string(),
+        stripeWebhookSecret: v.string(),
+        calendlyToken: v.string(),
+        calendlyEventType: v.string(),
       })),
     }),
   },

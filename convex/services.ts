@@ -84,6 +84,8 @@ export const createService = mutation({
 
     return await ctx.db.insert("services", {
       ...args,
+      packages: args.packages || [],
+      addOns: args.addOns || [],
       isActive: true,
     });
   },
