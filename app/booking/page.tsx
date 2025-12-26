@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useConvex } from 'convex/react';
+import { useConvex, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { useOrganization } from '@clerk/nextjs';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -16,10 +17,14 @@ import { Calendar, Clock, User, Car, CreditCard, CheckCircle } from 'lucide-reac
 
 type BookingStep = 'services' | 'customer' | 'datetime' | 'payment' | 'confirmation';
 
+
+
+
 export default function BookingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const convex = useConvex();
+  const { organization } = useOrganization();
   const [currentStep, setCurrentStep] = useState<BookingStep>('services');
   const [services, setServices] = useState<any[]>([]);
   const [selectedServices, setSelectedServices] = useState<any[]>([]);
@@ -38,8 +43,60 @@ export default function BookingPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState<string>('');
 
-  // Hardcode org id for now
-  const organizationId = 'your-org-id'; // TODO: get from context or params
+  // Get organization from Convex using Clerk ID
+  const convexOrg = useQuery(
+    api.organizations.getOrganization,
+    organization?.id ? { clerkId: organization.id } : 'skip'
+  );
+
+  const organizationId = convexOrg?._id;
+
+  // Show loading if organization is not loaded yet
+  if (organization?.id && !convexOrg) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+        <Header />
+        <main className="flex-grow pt-32 pb-20">
+          <div className="container px-4 mx-auto max-w-4xl">
+            <div className="text-center text-white">Loading organization...</div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error if organization not found
+  if (organization?.id && convexOrg === null) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+        <Header />
+        <main className="flex-grow pt-32 pb-20">
+          <div className="container px-4 mx-auto max-w-4xl">
+            <div className="text-center text-red-400">
+              Organization not found. Please contact support.
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Require organization to proceed
+  if (!organizationId) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#0a0a0a]">
+        <Header />
+        <main className="flex-grow pt-32 pb-20">
+          <div className="container px-4 mx-auto max-w-4xl">
+            <div className="text-center text-white">No organization selected.</div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -50,7 +107,9 @@ export default function BookingPage() {
         console.error('Failed to fetch services:', error);
       }
     };
-    fetchServices();
+    if (organizationId) {
+      fetchServices();
+    }
   }, [convex, organizationId]);
 
   useEffect(() => {
@@ -191,11 +250,10 @@ export default function BookingPage() {
               {services.map((service) => (
                 <div
                   key={service._id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    selectedServices.find(s => s._id === service._id)
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedServices.find(s => s._id === service._id)
                       ? 'border-primary bg-primary/10'
                       : 'border-gray-600 hover:border-primary/50'
-                  }`}
+                    }`}
                   onClick={() => handleServiceSelect(service)}
                 >
                   <div className="flex justify-between items-start">
@@ -311,11 +369,10 @@ export default function BookingPage() {
                     {availableSlots.map((slot: any) => (
                       <button
                         key={slot.start}
-                        className={`p-2 border rounded ${
-                          selectedDateTime === new Date(slot.start).toISOString().slice(0, 16)
+                        className={`p-2 border rounded ${selectedDateTime === new Date(slot.start).toISOString().slice(0, 16)
                             ? 'border-primary bg-primary/10'
                             : 'border-gray-600 hover:border-primary/50'
-                        }`}
+                          }`}
                         onClick={() => setSelectedDateTime(new Date(slot.start).toISOString().slice(0, 16))}
                       >
                         {new Date(slot.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -420,18 +477,16 @@ export default function BookingPage() {
 
                   return (
                     <div key={step.id} className="flex items-center">
-                      <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                        isCompleted
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${isCompleted
                           ? 'bg-green-500 border-green-500 text-white'
                           : isActive
-                          ? 'border-primary text-primary'
-                          : 'border-gray-600 text-gray-600'
-                      }`}>
+                            ? 'border-primary text-primary'
+                            : 'border-gray-600 text-gray-600'
+                        }`}>
                         <Icon size={20} />
                       </div>
-                      <span className={`ml-2 text-sm ${
-                        isActive ? 'text-primary' : 'text-gray-400'
-                      }`}>
+                      <span className={`ml-2 text-sm ${isActive ? 'text-primary' : 'text-gray-400'
+                        }`}>
                         {step.title}
                       </span>
                       {index < steps.length - 1 && (
