@@ -15,6 +15,55 @@ export const seedServices = action({
   },
 });
 
+// Seed subscription tiers
+export const seedTiers = action({
+  args: {},
+  handler: async (ctx) => {
+    console.log("Seeding subscription tiers...");
+
+    const tiers = [
+      {
+        name: "Basic",
+        price: 5999, // $59.99 in cents
+        benefits: "Basic maintenance reminders and email notifications for your vehicle",
+        maintenanceWashes: 1,
+        discountPercentage: 0,
+        stripePlanId: process.env.STRIPE_PRICE_BASIC || "price_basic_placeholder",
+      },
+      {
+        name: "Premium",
+        price: 7999, // $79.99 in cents
+        benefits: "Priority booking, monthly vehicle health reports, and exclusive service discounts",
+        maintenanceWashes: 2,
+        discountPercentage: 0,
+        stripePlanId: process.env.STRIPE_PRICE_PREMIUM || "price_premium_placeholder",
+      },
+      {
+        name: "VIP",
+        price: 9999, // $99.99 in cents
+        benefits: "10% discount on deep detail services, dedicated account manager, quarterly complimentary interior detailing",
+        maintenanceWashes: 3,
+        discountPercentage: 10,
+        stripePlanId: process.env.STRIPE_PRICE_VIP || "price_vip_placeholder",
+      },
+    ];
+
+    // Check if tiers already exist
+    const existingTiers = await ctx.runQuery(api.subscriptions.listTiers);
+    if (existingTiers.length > 0) {
+      console.log("Tiers already exist, skipping seeding");
+      return;
+    }
+
+    // Insert tiers using the mutation
+    for (const tier of tiers) {
+      await ctx.runMutation(api.subscriptions.insertTier, tier);
+    }
+
+    console.log("Tiers seeded successfully");
+  },
+});
+
 // Migration action to move static services data to Convex
 export const migrateServicesData = action({
   args: {

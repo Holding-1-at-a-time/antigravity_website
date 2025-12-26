@@ -171,3 +171,25 @@ export const getCustomerBookings = query({
     return await q.collect();
   },
 });
+
+// Get customer with subscription information
+export const getCustomerWithSubscription = query({
+  args: {
+    customerId: v.id("customers"),
+  },
+  handler: async (ctx, args) => {
+    const customer = await ctx.db.get(args.customerId);
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    // Get active subscription
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_customer", (q) => q.eq("customerId", args.customerId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .first();
+
+    return { ...customer, subscription };
+  },
+});

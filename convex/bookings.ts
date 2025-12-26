@@ -97,22 +97,56 @@ export const createBooking = mutation({
       }
     }
 
+    // Check for VIP subscription discount
+    const customerSubscription = await ctx.db
+      .query("subscriptions")
+      .withIndex("by_customer", (q) => q.eq("customerId", args.customerId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .first();
+
+    let hasVIPDiscount = false;
+    if (customerSubscription) {
+      const tier = await ctx.db.get(customerSubscription.tierId);
+      hasVIPDiscount = tier ? tier.discountPercentage > 0 : false;
+    }
+
     // Calculate total amount
     let totalAmount = 0;
     for (const serviceItem of args.services) {
       const service = await ctx.db.get(serviceItem.serviceId);
       if (service) {
+        let servicePrice = 0;
+
         // Use package price if specified, otherwise base price
         if (serviceItem.packageName) {
           const pkg = service.packages.find(p => p.name === serviceItem.packageName);
           if (pkg) {
-            totalAmount += pkg.price;
+            servicePrice = pkg.price;
           }
         } else {
-          totalAmount += service.basePrice;
+          servicePrice = service.basePrice;
         }
 
-        // Add add-on prices
+        // Apply VIP discount for deep detail services (10% off)
+        // Deep detail services include: ceramic coating, paint correction, interior deep cleansing,
+        // headlight restoration, scratch removal, water spot removal, glass treatment
+        const deepDetailCategories = [
+          'ceramic-coating',
+          'paint-correction',
+          'interior-deep-cleansing',
+          'headlight-restoration',
+          'scratch-removal',
+          'water-spot-removal',
+          'glass-treatment'
+        ];
+
+        if (hasVIPDiscount && deepDetailCategories.includes(service.category)) {
+          servicePrice *= 0.9; // 10% discount
+        }
+
+        totalAmount += servicePrice;
+
+        // Add add-on prices (add-ons are not discounted)
         for (const addOnName of serviceItem.addOns) {
           const addOn = service.addOns.find(a => a.name === addOnName);
           if (addOn) {

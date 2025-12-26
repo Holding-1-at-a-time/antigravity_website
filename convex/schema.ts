@@ -151,4 +151,37 @@ export default defineSchema({
     .index("by_customer", ["customerId"])
     .index("by_rating", ["organizationId", "rating"])
     .index("by_service_type", ["organizationId", "serviceType"]),
+
+  // Tiers table for subscription tiers
+  tiers: defineTable({
+    name: v.string(),
+    price: v.number(), // Monthly price in cents
+    benefits: v.string(),
+    maintenanceWashes: v.number(),
+    discountPercentage: v.number(), // 0-100
+    stripePlanId: v.string(), // Stripe plan ID for mapping
+  }),
+
+  // Subscriptions table for Maintenance Club
+  subscriptions: defineTable({
+    organizationId: v.id("organizations"),
+    customerId: v.id("customers"),
+    tierId: v.id("tiers"),
+    status: v.union(
+      v.literal("active"),
+      v.literal("cancelled"),
+      v.literal("past_due"),
+      v.literal("incomplete")
+    ),
+    stripeSubscriptionId: v.string(),
+    currentPeriodStart: v.number(), // timestamp
+    currentPeriodEnd: v.number(), // timestamp
+    cancelAtPeriodEnd: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_customer", ["customerId"])
+    .index("by_stripe_subscription", ["stripeSubscriptionId"])
+    .index("by_status", ["organizationId", "status"]),
 });

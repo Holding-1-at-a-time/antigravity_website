@@ -81,11 +81,13 @@ export async function PUT(request: NextRequest) {
         console.log('Checkout completed:', session.id);
 
         // Update booking payment status
-        await convex.mutation(api.bookings.updatePaymentStatus, {
-          bookingId: session.metadata.bookingId as any,
-          paymentStatus: 'paid',
-          stripePaymentIntentId: session.payment_intent as string,
-        });
+        if (session.metadata?.bookingId) {
+          await convex.mutation(api.bookings.updatePaymentStatus, {
+            bookingId: session.metadata.bookingId as any,
+            paymentStatus: 'paid',
+            stripePaymentIntentId: session.payment_intent as string,
+          });
+        }
         break;
 
       case 'checkout.session.expired':
@@ -93,10 +95,12 @@ export async function PUT(request: NextRequest) {
         console.log('Checkout expired:', expiredSession.id);
 
         // Update booking payment status
-        await convex.mutation(api.bookings.updatePaymentStatus, {
-          bookingId: expiredSession.metadata.bookingId as any,
-          paymentStatus: 'unpaid',
-        });
+        if (expiredSession.metadata?.bookingId) {
+          await convex.mutation(api.bookings.updatePaymentStatus, {
+            bookingId: expiredSession.metadata.bookingId as any,
+            paymentStatus: 'unpaid',
+          });
+        }
         break;
 
       default:

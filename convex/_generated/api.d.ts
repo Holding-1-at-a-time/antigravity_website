@@ -13,6 +13,7 @@ import type * as customers from "../customers.js";
 import type * as organizations from "../organizations.js";
 import type * as seed from "../seed.js";
 import type * as services from "../services.js";
+import type * as subscriptions from "../subscriptions.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   organizations: typeof organizations;
   seed: typeof seed;
   services: typeof services;
+  subscriptions: typeof subscriptions;
 }>;
 
 /**
