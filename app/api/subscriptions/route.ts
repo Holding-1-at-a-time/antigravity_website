@@ -5,7 +5,7 @@ import { api } from '../../../convex/_generated/api';
 
 // Initialize Stripe client
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-12-15.clover',
 });
 
 // Initialize Convex client
@@ -124,14 +124,18 @@ export async function PUT(request: NextRequest) {
 
         if (convexSubscription) {
           // Update subscription in Convex
+          // Note: In API version 2025-12-15.clover, subscription periods are accessed differently
+          const currentPeriodStart = (subscription as any).current_period_start || subscription.billing_cycle_anchor;
+          const currentPeriodEnd = (subscription as any).current_period_end || (currentPeriodStart + 30 * 24 * 60 * 60);
+
           await convex.mutation(api.subscriptions.updateSubscriptionStatus, {
             subscriptionId: convexSubscription._id,
             status: subscription.status === 'active' ? 'active' :
-                   subscription.status === 'canceled' ? 'cancelled' :
-                   subscription.status === 'past_due' ? 'past_due' : 'incomplete',
-            currentPeriodStart: subscription.current_period_start * 1000,
-            currentPeriodEnd: subscription.current_period_end * 1000,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+              subscription.status === 'canceled' ? 'cancelled' :
+                subscription.status === 'past_due' ? 'past_due' : 'incomplete',
+            currentPeriodStart: currentPeriodStart * 1000,
+            currentPeriodEnd: currentPeriodEnd * 1000,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
           });
         }
         break;
