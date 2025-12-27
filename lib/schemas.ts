@@ -292,7 +292,7 @@ export const generateServiceSchema = (serviceSlug: string, locationSlug?: string
 };
 
 // Location data helper
-function getLocationData(locationSlug: string) {
+function getLocationData(locationSlug: string): { name: string; zipCodes: string[] } | undefined {
   const locations = {
     'stone-oak': { name: 'Stone Oak', zipCodes: ['78258', '78260'] },
     'alamo-heights': { name: 'Alamo Heights', zipCodes: ['78209'] },

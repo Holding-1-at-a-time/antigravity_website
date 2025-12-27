@@ -16,21 +16,26 @@ export default function ArticleContent({ content }: ArticleContentProps) {
 
 // Helper function to add IDs to H2 headings
 function addIdsToHeadings(content: string): string {
-  const headingRegex = /<h2([^>]*)>([^<]+)<\/h2>/gi;
+  if (typeof window === 'undefined') {
+    // Server-side: use a library like 'node-html-parser' or 'jsdom'
+    return content;
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(content, 'text/html');
+  const h2Elements = doc.querySelectorAll('h2');
+
   let index = 0;
-  
-  return content.replace(headingRegex, (match, attributes, text) => {
-    const id = generateSlug(text.trim(), index);
-    const hasId = attributes.includes('id=');
-    
-    if (hasId) {
-      // If heading already has an ID, don't modify it
-      return match;
+  h2Elements.forEach((h2) => {
+    if (!h2.hasAttribute('id')) {
+      const text = h2.textContent || '';
+      const id = generateSlug(text.trim(), index);
+      h2.setAttribute('id', id);
+      index++;
     }
-    
-    index++;
-    return `<h2${attributes} id="${id}">${text}</h2>`;
   });
+
+  return doc.body.innerHTML;
 }
 
 // Helper function to generate URL-safe slugs (same as in page.tsx)

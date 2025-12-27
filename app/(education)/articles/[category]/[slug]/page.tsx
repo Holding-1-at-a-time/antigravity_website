@@ -94,6 +94,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   // Generate TOC from content H2 headings
   const tableOfContents: TocItem[] = generateTableOfContents(article.content);
+  
+  // Inject IDs into H2 elements
+  const contentWithIds = injectHeadingIds(article.content, tableOfContents);
 
   // Helper function to generate table of contents from H2 headings
   function generateTableOfContents(content: string): TocItem[] {
@@ -103,16 +106,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     let index = 0;
 
     while ((match = headingRegex.exec(content)) !== null) {
-      const text = match[1].trim();
-      const id = generateSlug(text, index);
-      
-      tocItems.push({
-        id,
-        text,
-        level: 2
-      });
-      
-      index++;
+      const text = match[1]?.trim() || '';
+      if (text) {
+        const id = generateSlug(text, index);
+        
+        tocItems.push({
+          id,
+          text,
+          level: 2
+        });
+        
+        index++;
+      }
     }
 
     return tocItems;
@@ -127,6 +132,28 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       .replace(/-+/g, '-')
       .trim()
       + (index > 0 ? `-${index}` : '');
+  }
+
+  // Helper function to inject IDs into H2 elements
+  function injectHeadingIds(content: string, tocItems: TocItem[]): string {
+    let modifiedContent = content;
+    let itemIndex = 0;
+    
+    modifiedContent = content.replace(/<h2([^>]*)>/gi, (match, attributes) => {
+      const tocItem = tocItems[itemIndex];
+      if (tocItem) {
+        const id = tocItem.id;
+        itemIndex++;
+        // Check if id attribute already exists
+        if (attributes.includes('id=')) {
+          return match;
+        }
+        return `<h2${attributes} id="${id}">`;
+      }
+      return match;
+    });
+    
+    return modifiedContent;
   }
 
   // Get related articles from same category (excluding current article)
@@ -205,7 +232,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <main className="lg:col-span-3">
               {/* Article Content */}
               <FadeIn>
-                <ArticleContent content={article.content} />
+                <ArticleContent content={contentWithIds} />
               </FadeIn>
 
               {/* Related Services */}
