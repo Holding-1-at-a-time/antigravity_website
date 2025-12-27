@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { ALL_SERVICES } from '@/lib/services-data';
+import { ARTICLES } from '@/lib/articles-data';
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = 'https://odaat1.com';
@@ -38,5 +39,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
         }))
     );
 
-    return [...routes, ...serviceRoutes, ...clusterRoutes];
+    // Articles Hub
+    const articlesHubRoute = {
+        url: `${baseUrl}/articles`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.9,
+    };
+
+    // Article Categories
+    const categoryRoutes = [
+        'protection',
+        'washing',
+        'correction',
+        'decontaminating',
+        'guides',
+        'maintenance',
+        'miscellaneous'
+    ].map((category) => ({
+        url: `${baseUrl}/articles/${category}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+    }));
+
+    // Individual Articles
+    const articleRoutes = ARTICLES.map((article) => ({
+        url: `${baseUrl}/articles/${article.categorySlug}/${article.slug}`,
+        lastModified: new Date(article.updatedAt),
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+    }));
+
+    return [...routes, ...serviceRoutes, ...clusterRoutes, articlesHubRoute, ...categoryRoutes, ...articleRoutes];
 }

@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ['@convex-dev/client'],
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'odaat1.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co', // For placeholder generation if needed
+      }
+    ],
+  },
 };
 
 export default nextConfig;
