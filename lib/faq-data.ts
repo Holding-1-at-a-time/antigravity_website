@@ -13,7 +13,7 @@ export const FAQ_DATA: FAQItem[] = [
   },
   {
     question: "What are your business hours?",
-    answer: "We operate Monday through Saturday from 8:00 AM to 6:00 PM. We're closed on Sundays to spend time with family. Our mobile service allows us to work flexible hours to accommodate your schedule.",
+    answer: "We operate Tuesday through Sunday from 7:00 AM to 10:00 PM. We are closed on Mondays. Our mobile service allows us to work flexible hours to accommodate your schedule.",
     category: 'business'
   },
   {

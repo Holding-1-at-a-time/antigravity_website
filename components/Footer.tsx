@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Instagram, Facebook, Twitter, Youtube, Star, Calendar, CheckCircle2, Award } from 'lucide-react';
+import { MapPin, Phone, Mail, Instagram, Facebook, Twitter, Youtube, Star, Calendar, CheckCircle2, Award, Clock } from 'lucide-react';
 import { FadeIn } from '@/components/ui/FadeIn';
 
 export default function Footer() {
@@ -145,6 +145,18 @@ export default function Footer() {
                         <FadeIn delay={0.3}>
                             <h4 className="text-white font-bold mb-6 font-heading">Get In Touch</h4>
                             <ul className="space-y-4">
+                                <motion.li
+                                    className="flex items-start gap-3 group"
+                                    whileHover={{ x: 5 }}
+                                    transition={{ type: "spring", stiffness: 300 }}
+                                >
+                                    <Clock size={18} className="text-primary shrink-0 mt-1 group-hover:scale-110 transition-transform" />
+                                    <div className="text-gray-400 text-sm">
+                                        <p className="group-hover:text-white transition-colors">Tue-Sun: 7:00 AM - 10:00 PM</p>
+                                        <p className="text-red-400/80 text-xs mt-0.5">Monday: Closed</p>
+                                    </div>
+                                </motion.li>
+
                                 <motion.li
                                     className="flex items-start gap-3 group"
                                     whileHover={{ x: 5 }}

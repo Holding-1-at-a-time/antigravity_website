@@ -1,9 +1,13 @@
 import { MetadataRoute } from 'next';
 import { ALL_SERVICES } from '@/lib/services-data';
-import { ARTICLES } from '@/lib/articles-data';
+import { fetchQuery } from 'convex/nextjs/server';
+import { api } from '@/convex/_generated/api';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://odaat1.com';
+
+    // Fetch all articles from Convex
+    const articles = await fetchQuery(api.articles.getAllArticles, {});
 
     // Base routes
     const routes = [
@@ -13,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         '/reviews',
         '/faq',
         '/services',
-
+        '/articles',
     ].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
@@ -39,14 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         }))
     );
 
-    // Articles Hub
-    const articlesHubRoute = {
-        url: `${baseUrl}/articles`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.9,
-    };
-
     // Article Categories
     const categoryRoutes = [
         'protection',
@@ -63,13 +59,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.8,
     }));
 
-    // Individual Articles
-    const articleRoutes = ARTICLES.map((article) => ({
+    // Individual Articles from Convex
+    const articleRoutes = articles.map((article) => ({
         url: `${baseUrl}/articles/${article.categorySlug}/${article.slug}`,
-        lastModified: new Date(article.updatedAt),
-        changeFrequency: 'monthly' as const,
+        lastModified: new Date(article.updatedAt || Date.now()),
+        changeFrequency: 'yearly' as const, // Wiki content changes less often
         priority: 0.6,
     }));
 
-    return [...routes, ...serviceRoutes, ...clusterRoutes, articlesHubRoute, ...categoryRoutes, ...articleRoutes];
+    return [...routes, ...serviceRoutes, ...clusterRoutes, ...categoryRoutes, ...articleRoutes];
 }

@@ -21,7 +21,7 @@ const BUSINESS_INFO = {
     latitude: 29.6199,
     longitude: -98.4738
   },
-  openingHours: "Mo-Sa 08:00-18:00",
+  openingHours: "Tu-Su 07:00-22:00",
   priceRange: "$$",
   areaServed: [
     { "@type": "City", name: "San Antonio" },
@@ -89,9 +89,9 @@ export const localBusinessSchema = {
   },
   "openingHoursSpecification": {
     "@type": "OpeningHoursSpecification",
-    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    "opens": "08:00",
-    "closes": "18:00"
+    "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "opens": "07:00",
+    "closes": "22:00"
   },
   "priceRange": BUSINESS_INFO.priceRange,
   "areaServed": BUSINESS_INFO.areaServed,

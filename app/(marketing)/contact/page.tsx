@@ -55,7 +55,10 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="text-white font-bold mb-1">Phone</h3>
                                             <a href="tel:+17262071007" className="text-gray-400 hover:text-primary transition-colors text-lg font-medium block">(726) 207-1007</a>
-                                            <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Mon-Sat: 8am - 6pm</p>
+                                            <div className="flex flex-col gap-1 mt-2">
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider">Tue-Sun: 7am - 10pm</p>
+                                                <p className="text-xs text-red-400/80 uppercase tracking-wider">Mon: Closed</p>
+                                            </div>
                                         </div>
                                     </div>
 
