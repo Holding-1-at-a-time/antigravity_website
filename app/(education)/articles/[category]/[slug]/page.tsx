@@ -11,6 +11,14 @@ import ArticleRelated from '@/components/articles/article-related';
 import ArticleCta from '@/components/articles/article-cta';
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
+
+// Types for table of contents
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
 
 // Enable ISR
 export const revalidate = 3600;
@@ -25,7 +33,7 @@ interface ArticlePageProps {
 export async function generateStaticParams() {
   const articles = await fetchQuery(api.articles.getAllArticles);
 
-  return articles.map((article) => ({
+  return articles.map((article: Doc<"articles">) => ({
     category: article.categorySlug,
     slug: article.slug,
   }));
@@ -84,8 +92,42 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
-  // TODO: Generate TOC from content H2 headings
-  const tableOfContents = [];
+  // Generate TOC from content H2 headings
+  const tableOfContents: TocItem[] = generateTableOfContents(article.content);
+
+  // Helper function to generate table of contents from H2 headings
+  function generateTableOfContents(content: string): TocItem[] {
+    const headingRegex = /<h2[^>]*>([^<]+)<\/h2>/gi;
+    const tocItems: TocItem[] = [];
+    let match;
+    let index = 0;
+
+    while ((match = headingRegex.exec(content)) !== null) {
+      const text = match[1].trim();
+      const id = generateSlug(text, index);
+      
+      tocItems.push({
+        id,
+        text,
+        level: 2
+      });
+      
+      index++;
+    }
+
+    return tocItems;
+  }
+
+  // Helper function to generate URL-safe slugs
+  function generateSlug(text: string, index: number): string {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim()
+      + (index > 0 ? `-${index}` : '');
+  }
 
   // Get related articles from same category (excluding current article)
   const allRelatedArticles = await fetchQuery(api.articles.getArticlesByCategory, {
@@ -93,7 +135,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   });
 
   const relatedArticles = allRelatedArticles
-    .filter(a => a.slug !== slug)
+    .filter((a: Doc<"articles">) => a.slug !== slug)
     .slice(0, 6);
 
   // Schema markup for Article
@@ -127,7 +169,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const faqSchema = article.faqs.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": article.faqs.map(faq => ({
+    "mainEntity": article.faqs.map((faq) => ({
       "@type": "Question",
       "name": faq.question,
       "acceptedAnswer": {

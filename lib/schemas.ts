@@ -255,27 +255,51 @@ export const generateBreadcrumbSchema = (breadcrumbs: Array<{ name: string; url:
 });
 
 // Service Schema Generator
-export const generateServiceSchema = (serviceSlug: string) => {
+export const generateServiceSchema = (serviceSlug: string, locationSlug?: string) => {
   const service = ALL_SERVICES.find(s => s.slug === serviceSlug);
   if (!service) return null;
+
+  const locationData = locationSlug ? getLocationData(locationSlug) : null;
 
   return {
     "@context": "https://schema.org",
     "@type": "Service",
-    "name": service.title,
-    "description": service.fullDescription,
+    "name": locationData ? `${service.title} ${locationData.name}` : service.title,
+    "description": locationData
+      ? `${service.title} services in ${locationData.name}, San Antonio. ${service.fullDescription}`
+      : service.fullDescription,
     "provider": {
       "@type": "LocalBusiness",
       "@id": `${BUSINESS_INFO.url}/#localbusiness`
     },
     "serviceType": "Auto Detailing",
-    "areaServed": BUSINESS_INFO.areaServed,
+    "areaServed": locationData ? [
+      {
+        "@type": "Neighborhood",
+        "name": locationData.name
+      },
+      {
+        "@type": "City",
+        "name": "San Antonio",
+        "addressRegion": "TX"
+      }
+    ] : BUSINESS_INFO.areaServed,
     "offers": {
       "@type": "Offer",
       "availability": "https://schema.org/InStock"
     }
   };
 };
+
+// Location data helper
+function getLocationData(locationSlug: string) {
+  const locations = {
+    'stone-oak': { name: 'Stone Oak', zipCodes: ['78258', '78260'] },
+    'alamo-heights': { name: 'Alamo Heights', zipCodes: ['78209'] },
+    'san-antonio': { name: 'San Antonio', zipCodes: ['78201', '78202', '78203'] }
+  };
+  return locations[locationSlug as keyof typeof locations];
+}
 
 // Service Cluster Schema Generator
 export const generateServiceClusterSchema = (serviceSlug: string, clusterSlug: string) => {

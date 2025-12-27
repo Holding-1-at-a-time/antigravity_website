@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { ALL_SERVICES } from '@/lib/services-data';
-import { fetchQuery } from 'convex/nextjs/server';
+import { fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -40,6 +40,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
+        }))
+    );
+
+    // Location-Specific Services (Local SEO boost)
+    const locationRoutes = ALL_SERVICES.flatMap((service) =>
+        ['stone-oak', 'alamo-heights', 'san-antonio'].map((location) => ({
+            url: `${baseUrl}/services/${service.slug}/${location}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
         }))
     );
 

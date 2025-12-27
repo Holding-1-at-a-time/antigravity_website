@@ -40,13 +40,16 @@ export const ARTICLES: Article[] = [
       </ul>
 
       <h2>Ceramic Coating vs Traditional Protection Methods</h2>
-      <p>While wax provides temporary protection and requires frequent reapplication, ceramic coating offers:</p>
+      <p>While wax provides temporary protection and requires frequent reapplication, <a href="/services/ceramic-coating">ceramic coating San Antonio</a> offers:</p>
       <ul>
         <li>2-5 years of protection (depending on the product)</li>
         <li>Chemical resistance to acidic contaminants</li>
         <li>Reduced water spotting</li>
         <li>Easier maintenance</li>
       </ul>
+
+      <h2>Serving San Antonio Communities</h2>
+      <p>We provide professional ceramic coating services throughout the San Antonio area, including <a href="/services/ceramic-coating/stone-oak">Stone Oak ceramic coating</a>, <a href="/services/auto-detailing/alamo-heights">Alamo Heights auto detailing</a>, and surrounding neighborhoods. Our mobile service comes to you for convenience.</p>
     `,
     readingTime: 8,
     publishedAt: Date.now(),
