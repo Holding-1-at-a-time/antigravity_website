@@ -195,7 +195,7 @@ export const ARTICLES: Article[] = [
       </ul>
     `,
     readingTime: 5,
-    publishedTime: Date.now(),
+    publishedAt: Date.now(),
     updatedAt: Date.now(),
     faqs: [
       {
