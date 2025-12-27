@@ -80,19 +80,21 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
               {services.map((service, index) => (
                 <FadeIn key={index} delay={0.2 * index}>
-                  <GlassCard className="h-full group p-8 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-primary transition-colors">
-                        {service.title}
-                      </h3>
-                      <p className="text-gray-400 mb-8 leading-relaxed">
-                        {service.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center text-sm font-semibold text-primary gap-2 group-hover:translate-x-2 transition-transform cursor-pointer">
-                      Learn More <ArrowRight size={16} />
-                    </div>
-                  </GlassCard>
+                  <Link href={service.link} className="block h-full">
+                    <GlassCard className="h-full group p-8 flex flex-col justify-between hover:bg-white/10 transition-colors">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-primary transition-colors">
+                          {service.title}
+                        </h3>
+                        <p className="text-gray-400 mb-8 leading-relaxed">
+                          {service.description}
+                        </p>
+                      </div>
+                      <div className="flex items-center text-sm font-semibold text-primary gap-2 group-hover:translate-x-2 transition-transform">
+                        Learn More <ArrowRight size={16} />
+                      </div>
+                    </GlassCard>
+                  </Link>
                 </FadeIn>
               ))}
             </div>

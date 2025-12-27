@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Calendar, Phone, MapPin, Star, Search, ChevronDown, Facebook, Instagram, Twitter, HelpCircle } from 'lucide-react';
+import { Menu, X, Calendar, Phone, MapPin, Star, Search, ChevronDown, Facebook, Instagram, Twitter, HelpCircle, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { ALL_SERVICES } from '@/lib/services-data';
@@ -80,6 +80,7 @@ export default function Header() {
     const navLinks = [
         { href: '/', label: 'Home', icon: Star },
         { href: '/services', label: 'Services', icon: Calendar },
+        { href: '/articles', label: 'Articles', icon: BookOpen },
         { href: '/about', label: 'About', icon: MapPin },
         { href: '/reviews', label: 'Reviews', icon: Star },
         { href: '/faq', label: 'FAQ', icon: HelpCircle },
@@ -143,330 +144,120 @@ export default function Header() {
             {/* Header - Hide on home page */}
             {!isHomePage && (
                 <motion.header
-                style={{ y: scrolled ? 0 : 40 }}
-            className={cn(
-                "fixed w-full top-0 z-50 transition-all duration-500 border-b overflow-hidden",
-                scrolled
-                    ? "bg-[#0a0a0a]/90 backdrop-blur-2xl border-white/20 h-20 shadow-2xl shadow-black/50"
-                    : "bg-transparent h-24 border-transparent"
-            )}
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-            {/* Floating Particles */}
-            <div className="absolute inset-0 pointer-events-none">
-                {[...Array(8)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-primary/30 rounded-full"
-                        style={{
-                            left: `${10 + i * 12}%`,
-                            top: `${20 + (i % 3) * 30}%`,
-                        }}
-                        animate={{
-                            y: [0, -20, 0],
-                            opacity: [0.3, 0.8, 0.3],
-                            scale: [1, 1.5, 1],
-                        }}
-                        transition={{
-                            duration: 3 + i * 0.5,
-                            repeat: Infinity,
-                            delay: i * 0.2,
-                        }}
-                    />
-                ))}
-            </div>
-            <div className="container h-full flex items-center justify-between px-4">
-                {/* Logo */}
-                <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    style={{ y: scrolled ? 0 : 40 }}
+                    className={cn(
+                        "fixed w-full top-0 z-50 transition-all duration-500 border-b overflow-hidden",
+                        scrolled
+                            ? "bg-[#0a0a0a]/90 backdrop-blur-2xl border-white/20 h-20 shadow-2xl shadow-black/50"
+                            : "bg-transparent h-24 border-transparent"
+                    )}
+                    initial={{ y: -100 }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
                 >
-                    <Link href="/" className="relative flex items-center group">
-                        <motion.div
-                            whileHover={{ rotate: [0, -5, 5, 0] }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <Image
-                                src="/images/logo.png"
-                                alt="One Detail At A Time"
-                                width={scrolled ? 140 : 170}
-                                height={45}
-                                className="object-contain transition-all duration-500 drop-shadow-lg"
-                                priority
+                    {/* Floating Particles */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(8)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                className="absolute w-1 h-1 bg-primary/30 rounded-full"
+                                style={{
+                                    left: `${10 + i * 12}%`,
+                                    top: `${20 + (i % 3) * 30}%`,
+                                }}
+                                animate={{
+                                    y: [0, -20, 0],
+                                    opacity: [0.3, 0.8, 0.3],
+                                    scale: [1, 1.5, 1],
+                                }}
+                                transition={{
+                                    duration: 3 + i * 0.5,
+                                    repeat: Infinity,
+                                    delay: i * 0.2,
+                                }}
                             />
-                        </motion.div>
+                        ))}
+                    </div>
+                    <div className="container h-full flex items-center justify-between px-4">
+                        {/* Logo */}
                         <motion.div
-                            className="absolute -inset-2 bg-primary/10 rounded-lg opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 -z-10"
-                            initial={false}
-                        />
-                    </Link>
-                </motion.div>
-
-                {/* Desktop Nav */}
-                <nav className="hidden md:flex items-center gap-1">
-                    {navLinks.map((link, index) => (
-                        <motion.div
-                            key={link.href}
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 * index, duration: 0.5 }}
-                        >
-                            <Link
-                                href={link.href}
-                                className={cn(
-                                    "relative px-4 py-2 text-sm font-medium tracking-wide transition-all duration-300 rounded-full group",
-                                    activeSection === link.href
-                                        ? "text-primary bg-primary/10"
-                                        : "text-gray-300 hover:text-primary hover:bg-white/5"
-                                )}
-                            >
-                                <span className="flex items-center gap-2">
-                                    <link.icon size={14} className="group-hover:scale-110 transition-transform" />
-                                    {link.label}
-                                </span>
-                                {activeSection === link.href && (
-                                    <motion.div
-                                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"
-                                        layoutId="activeIndicator"
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    />
-                                )}
-                                <motion.div
-                                    className="absolute inset-0 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    initial={false}
-                                />
-                            </Link>
-                        </motion.div>
-                    ))}
-
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.5, duration: 0.5 }}
-                        className="ml-4"
-                    >
-                        <motion.div
-                            whileHover={{
-                                scale: 1.05,
-                                boxShadow: "0 0 30px rgba(0,174,152,0.4)"
-                            }}
+                            whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <Link
-                                href="/contact"
-                                className="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-black font-bold rounded-full text-sm overflow-hidden shadow-lg hover:shadow-primary/30 transition-all duration-300"
-                            >
+                            <Link href="/" className="relative flex items-center group">
                                 <motion.div
-                                    animate={{
-                                        rotate: [0, 10, -10, 0],
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut",
-                                    }}
+                                    whileHover={{ rotate: [0, -5, 5, 0] }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <Calendar size={16} />
+                                    <Image
+                                        src="/images/logo.png"
+                                        alt="One Detail At A Time"
+                                        width={scrolled ? 140 : 170}
+                                        height={45}
+                                        className="object-contain transition-all duration-500 drop-shadow-lg"
+                                        priority
+                                    />
                                 </motion.div>
-                                <span>Book Now</span>
                                 <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-primary-light to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    initial={false}
-                                />
-                                <motion.div
-                                    className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"
+                                    className="absolute -inset-2 bg-primary/10 rounded-lg opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 -z-10"
                                     initial={false}
                                 />
                             </Link>
                         </motion.div>
-                    </motion.div>
-                </nav>
 
-                {/* Desktop Quick Actions */}
-                <div className="hidden md:flex items-center gap-2">
-                    {/* Search Button */}
-                    <motion.button
-                        onClick={() => setShowSearch(!showSearch)}
-                        className="relative p-2 text-white hover:text-primary transition-colors duration-300 rounded-full hover:bg-white/5"
-                        aria-label="Search services"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                    >
-                        <Search size={18} />
-                    </motion.button>
-
-                    {/* Contact Dropdown */}
-                    <div className="relative">
-                        <motion.button
-                            onClick={() => setShowContact(!showContact)}
-                            className="relative p-2 text-white hover:text-primary transition-colors duration-300 rounded-full hover:bg-white/5"
-                            aria-label="Quick contact"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                        >
-                            <Phone size={18} />
-                            <ChevronDown size={12} className="ml-1" />
-                        </motion.button>
-
-                        <AnimatePresence>
-                            {showContact && (
+                        {/* Desktop Nav */}
+                        <nav className="hidden md:flex items-center gap-1">
+                            {navLinks.map((link, index) => (
                                 <motion.div
-                                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                    className="absolute right-0 top-full mt-2 w-64 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-white/20 rounded-xl p-4 shadow-2xl"
+                                    key={link.href}
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 * index, duration: 0.5 }}
                                 >
-                                    <div className="space-y-3">
-                                        <a
-                                            href="tel:+17262071007"
-                                            className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors"
-                                        >
-                                            <Phone size={16} className="text-primary" />
-                                            <div>
-                                                <p className="text-xs text-gray-400">Call Now</p>
-                                                <p className="text-white font-semibold">(726) 207-1007</p>
-                                            </div>
-                                        </a>
-                                        <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
-                                            <MapPin size={16} className="text-primary" />
-                                            <div>
-                                                <p className="text-xs text-gray-400">Location</p>
-                                                <p className="text-white text-sm">11692 Bricken Circle, San Antonio</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 pt-2 border-t border-white/10">
-                                            <motion.a
-                                                href="https://facebook.com"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.9 }}
-                                            >
-                                                <Facebook size={16} />
-                                            </motion.a>
-                                            <motion.a
-                                                href="https://instagram.com"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 text-gray-400 hover:text-pink-500 transition-colors"
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.9 }}
-                                            >
-                                                <Instagram size={16} />
-                                            </motion.a>
-                                            <motion.a
-                                                href="https://twitter.com"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.9 }}
-                                            >
-                                                <Twitter size={16} />
-                                            </motion.a>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                </div>
-
-                {/* Mobile Menu Button */}
-                <motion.button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="lg:hidden relative p-3 text-white hover:text-primary transition-colors duration-300 rounded-full hover:bg-white/5"
-                    aria-label="Toggle menu"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                >
-                    <motion.div
-                        animate={{ rotate: isOpen ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {isOpen ? <X size={24} /> : <Menu size={24} />}
-                    </motion.div>
-                    <motion.div
-                        className="absolute inset-0 bg-primary/20 rounded-full opacity-0"
-                        animate={{ scale: isOpen ? 1.2 : 0, opacity: isOpen ? 0.3 : 0 }}
-                        transition={{ duration: 0.3 }}
-                    />
-                </motion.button>
-            </div>
-
-            {/* Mobile Menu */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial="closed"
-                        animate="open"
-                        exit="closed"
-                        variants={menuVariants}
-                        className="md:hidden bg-[#0a0a0a]/98 backdrop-blur-2xl border-b border-white/20 overflow-hidden shadow-2xl"
-                    >
-                        <div className="container px-6 py-8">
-                            <motion.div
-                                variants={itemVariants}
-                                className="mb-8"
-                            >
-                                <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
-                                    <Phone size={20} className="text-primary" />
-                                    <div>
-                                        <p className="text-sm text-gray-400">Call us now</p>
-                                        <p className="text-white font-semibold">(726) 207-1007</p>
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            <div className="space-y-2">
-                                {navLinks.map((link, index) => (
-                                    <motion.div
-                                        key={link.href}
-                                        variants={itemVariants}
-                                        custom={index}
+                                    <Link
+                                        href={link.href}
+                                        className={cn(
+                                            "relative px-4 py-2 text-sm font-medium tracking-wide transition-all duration-300 rounded-full group",
+                                            activeSection === link.href
+                                                ? "text-primary bg-primary/10"
+                                                : "text-gray-300 hover:text-primary hover:bg-white/5"
+                                        )}
                                     >
-                                        <Link
-                                            href={link.href}
-                                            onClick={() => setIsOpen(false)}
-                                            className="group flex items-center gap-4 p-4 text-lg font-medium text-white/90 hover:text-primary hover:bg-white/5 rounded-xl transition-all duration-300 border border-transparent hover:border-white/10"
-                                        >
+                                        <span className="flex items-center gap-2">
+                                            <link.icon size={14} className="group-hover:scale-110 transition-transform" />
+                                            {link.label}
+                                        </span>
+                                        {activeSection === link.href && (
                                             <motion.div
-                                                whileHover={{ scale: 1.2, rotate: 5 }}
-                                                transition={{ type: "spring", stiffness: 400 }}
-                                            >
-                                                <link.icon size={20} />
-                                            </motion.div>
-                                            <span className="group-hover:translate-x-2 transition-transform duration-300">
-                                                {link.label}
-                                            </span>
-                                            <motion.div
-                                                className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                                                initial={{ x: -10 }}
-                                                whileHover={{ x: 0 }}
-                                            >
-                                                →
-                                            </motion.div>
-                                        </Link>
-                                    </motion.div>
-                                ))}
-                            </div>
+                                                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"
+                                                layoutId="activeIndicator"
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+                                        <motion.div
+                                            className="absolute inset-0 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                            initial={false}
+                                        />
+                                    </Link>
+                                </motion.div>
+                            ))}
 
                             <motion.div
-                                variants={itemVariants}
-                                className="mt-8 pt-6 border-t border-white/10"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.5, duration: 0.5 }}
+                                className="ml-4"
                             >
                                 <motion.div
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={{
+                                        scale: 1.05,
+                                        boxShadow: "0 0 30px rgba(0,174,152,0.4)"
+                                    }}
+                                    whileTap={{ scale: 0.95 }}
                                 >
                                     <Link
                                         href="/contact"
-                                        onClick={() => setIsOpen(false)}
-                                        className="group flex items-center justify-center gap-3 w-full py-5 bg-gradient-to-r from-primary to-primary-light text-black font-bold rounded-2xl shadow-lg hover:shadow-primary/30 transition-all duration-300"
+                                        className="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary to-primary-light text-black font-bold rounded-full text-sm overflow-hidden shadow-lg hover:shadow-primary/30 transition-all duration-300"
                                     >
                                         <motion.div
                                             animate={{
@@ -478,21 +269,231 @@ export default function Header() {
                                                 ease: "easeInOut",
                                             }}
                                         >
-                                            <Calendar size={20} />
+                                            <Calendar size={16} />
                                         </motion.div>
-                                        <span>Book Your Appointment</span>
+                                        <span>Book Now</span>
                                         <motion.div
-                                            className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                                            className="absolute inset-0 bg-gradient-to-r from-primary-light to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                            initial={false}
+                                        />
+                                        <motion.div
+                                            className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"
                                             initial={false}
                                         />
                                     </Link>
                                 </motion.div>
                             </motion.div>
+                        </nav>
+
+                        {/* Desktop Quick Actions */}
+                        <div className="hidden md:flex items-center gap-2">
+                            {/* Search Button */}
+                            <motion.button
+                                onClick={() => setShowSearch(!showSearch)}
+                                className="relative p-2 text-white hover:text-primary transition-colors duration-300 rounded-full hover:bg-white/5"
+                                aria-label="Search services"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                <Search size={18} />
+                            </motion.button>
+
+                            {/* Contact Dropdown */}
+                            <div className="relative">
+                                <motion.button
+                                    onClick={() => setShowContact(!showContact)}
+                                    className="relative p-2 text-white hover:text-primary transition-colors duration-300 rounded-full hover:bg-white/5"
+                                    aria-label="Quick contact"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                >
+                                    <Phone size={18} />
+                                    <ChevronDown size={12} className="ml-1" />
+                                </motion.button>
+
+                                <AnimatePresence>
+                                    {showContact && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                            className="absolute right-0 top-full mt-2 w-64 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-white/20 rounded-xl p-4 shadow-2xl"
+                                        >
+                                            <div className="space-y-3">
+                                                <a
+                                                    href="tel:+17262071007"
+                                                    className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors"
+                                                >
+                                                    <Phone size={16} className="text-primary" />
+                                                    <div>
+                                                        <p className="text-xs text-gray-400">Call Now</p>
+                                                        <p className="text-white font-semibold">(726) 207-1007</p>
+                                                    </div>
+                                                </a>
+                                                <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-lg transition-colors">
+                                                    <MapPin size={16} className="text-primary" />
+                                                    <div>
+                                                        <p className="text-xs text-gray-400">Location</p>
+                                                        <p className="text-white text-sm">11692 Bricken Circle, San Antonio</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 pt-2 border-t border-white/10">
+                                                    <motion.a
+                                                        href="https://facebook.com"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        <Facebook size={16} />
+                                                    </motion.a>
+                                                    <motion.a
+                                                        href="https://instagram.com"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 text-gray-400 hover:text-pink-500 transition-colors"
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        <Instagram size={16} />
+                                                    </motion.a>
+                                                    <motion.a
+                                                        href="https://twitter.com"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                    >
+                                                        <Twitter size={16} />
+                                                    </motion.a>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.header>
+
+                        {/* Mobile Menu Button */}
+                        <motion.button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="lg:hidden relative p-3 text-white hover:text-primary transition-colors duration-300 rounded-full hover:bg-white/5"
+                            aria-label="Toggle menu"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                        >
+                            <motion.div
+                                animate={{ rotate: isOpen ? 180 : 0 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                            </motion.div>
+                            <motion.div
+                                className="absolute inset-0 bg-primary/20 rounded-full opacity-0"
+                                animate={{ scale: isOpen ? 1.2 : 0, opacity: isOpen ? 0.3 : 0 }}
+                                transition={{ duration: 0.3 }}
+                            />
+                        </motion.button>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    <AnimatePresence>
+                        {isOpen && (
+                            <motion.div
+                                initial="closed"
+                                animate="open"
+                                exit="closed"
+                                variants={menuVariants}
+                                className="md:hidden bg-[#0a0a0a]/98 backdrop-blur-2xl border-b border-white/20 overflow-hidden shadow-2xl"
+                            >
+                                <div className="container px-6 py-8">
+                                    <motion.div
+                                        variants={itemVariants}
+                                        className="mb-8"
+                                    >
+                                        <div className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/10">
+                                            <Phone size={20} className="text-primary" />
+                                            <div>
+                                                <p className="text-sm text-gray-400">Call us now</p>
+                                                <p className="text-white font-semibold">(726) 207-1007</p>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                    <div className="space-y-2">
+                                        {navLinks.map((link, index) => (
+                                            <motion.div
+                                                key={link.href}
+                                                variants={itemVariants}
+                                                custom={index}
+                                            >
+                                                <Link
+                                                    href={link.href}
+                                                    onClick={() => setIsOpen(false)}
+                                                    className="group flex items-center gap-4 p-4 text-lg font-medium text-white/90 hover:text-primary hover:bg-white/5 rounded-xl transition-all duration-300 border border-transparent hover:border-white/10"
+                                                >
+                                                    <motion.div
+                                                        whileHover={{ scale: 1.2, rotate: 5 }}
+                                                        transition={{ type: "spring", stiffness: 400 }}
+                                                    >
+                                                        <link.icon size={20} />
+                                                    </motion.div>
+                                                    <span className="group-hover:translate-x-2 transition-transform duration-300">
+                                                        {link.label}
+                                                    </span>
+                                                    <motion.div
+                                                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        initial={{ x: -10 }}
+                                                        whileHover={{ x: 0 }}
+                                                    >
+                                                        →
+                                                    </motion.div>
+                                                </Link>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+
+                                    <motion.div
+                                        variants={itemVariants}
+                                        className="mt-8 pt-6 border-t border-white/10"
+                                    >
+                                        <motion.div
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Link
+                                                href="/contact"
+                                                onClick={() => setIsOpen(false)}
+                                                className="group flex items-center justify-center gap-3 w-full py-5 bg-gradient-to-r from-primary to-primary-light text-black font-bold rounded-2xl shadow-lg hover:shadow-primary/30 transition-all duration-300"
+                                            >
+                                                <motion.div
+                                                    animate={{
+                                                        rotate: [0, 10, -10, 0],
+                                                    }}
+                                                    transition={{
+                                                        duration: 2,
+                                                        repeat: Infinity,
+                                                        ease: "easeInOut",
+                                                    }}
+                                                >
+                                                    <Calendar size={20} />
+                                                </motion.div>
+                                                <span>Book Your Appointment</span>
+                                                <motion.div
+                                                    className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                                                    initial={false}
+                                                />
+                                            </Link>
+                                        </motion.div>
+                                    </motion.div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.header>
             )}
             {/* Search Overlay */}
             <AnimatePresence>
@@ -553,8 +554,8 @@ export default function Header() {
                                     service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                     service.shortDescription.toLowerCase().includes(searchQuery.toLowerCase())
                                 ).length === 0 && searchQuery && (
-                                    <p className="text-gray-400 text-center py-4">No services found</p>
-                                )}
+                                        <p className="text-gray-400 text-center py-4">No services found</p>
+                                    )}
                             </div>
                         </motion.div>
                     </motion.div>

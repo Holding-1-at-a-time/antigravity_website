@@ -117,3 +117,35 @@ export const deleteArticle = mutation({
     return await ctx.db.delete(args.id);
   },
 });
+
+// Seed article (create if not exists, for bulk population)
+export const seedArticle = mutation({
+  args: {
+    slug: v.string(),
+    title: v.string(),
+    category: v.string(),
+    categorySlug: v.string(),
+    excerpt: v.string(),
+    content: v.string(),
+    readingTime: v.number(),
+    publishedAt: v.number(),
+    updatedAt: v.number(),
+    relatedServiceSlug: v.optional(v.string()),
+    faqs: v.array(v.object({
+      question: v.string(),
+      answer: v.string(),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("articles")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (existing) {
+      return existing._id;
+    }
+
+    return await ctx.db.insert("articles", args);
+  },
+});

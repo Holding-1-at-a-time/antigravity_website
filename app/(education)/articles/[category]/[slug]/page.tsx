@@ -63,6 +63,12 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     alternates: {
       canonical: `https://odaat1.com/articles/${category}/${slug}`,
     },
+    other: {
+      "geo.region": "US-TX",
+      "geo.placename": "San Antonio",
+      "geo.position": "29.4241;-98.4936",
+      "ICBM": "29.4241, -98.4936"
+    }
   };
 }
 
@@ -102,6 +108,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     "publisher": {
       "@type": "LocalBusiness",
       "name": "One Detail At A Time LLC",
+      "telephone": "(726) 207-1007",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "San Antonio",
